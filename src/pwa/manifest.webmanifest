@@ -1,0 +1,60 @@
+{
+  "id": "./index.html",
+  "name": "Gym Tracker — Track your gains",
+  "short_name": "Gym Tracker",
+  "description": "Catat set, repetisi, dan beban. Pantau progres, personal record, jadwal, dan metrik tubuh dalam satu dashboard.",
+  "lang": "id",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#f9fafb",
+  "theme_color": "#465fff",
+  "categories": ["health", "fitness", "lifestyle", "sports"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Lihat ringkasan progres latihan",
+      "url": "./dashboard.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Jadwal latihan",
+      "short_name": "Jadwal",
+      "description": "Lihat dan atur jadwal latihan",
+      "url": "./schedule.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Progres & PR",
+      "short_name": "Progres",
+      "description": "Lihat grafik progres dan personal record",
+      "url": "./progress.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false
+}

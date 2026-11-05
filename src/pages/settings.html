@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#465fff" />
+    <meta name="description" content="Atur profil, satuan, notifikasi, rest timer, dan data Gym Tracker." />
+    <title>Pengaturan | Gym Tracker</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="images/favicon.ico" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  </head>
+  <body
+    style="visibility: hidden"
+    data-page="settings"
+    data-auth="required"
+    x-data="appShell('settings')"
+    :class="{ 'dark': darkMode }"
+    class="bg-gray-50 font-outfit text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100"
+  >
+    <div class="flex h-screen overflow-hidden">
+      <include src="./partials/layout/sidebar.html" />
+      <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+        <main id="main-content">
+          <include src="./partials/layout/header.html" />
+
+          <div class="mx-auto max-w-(--breakpoint-2xl) p-4 pb-28 md:p-6 xl:pb-8" x-data="settingsPage()" x-init="init()">
+            <div class="mb-5">
+              <h2 class="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">Pengaturan</h2>
+              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Atur profil, satuan, pengingat, dan kelola data latihanmu.</p>
+            </div>
+
+            <div class="grid grid-cols-12 gap-5">
+              <div class="col-span-12 space-y-5 xl:col-span-8">
+                <!-- Profile -->
+                <section class="rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+                  <div class="flex items-center gap-3 border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+                    <span class="flex size-10 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/15">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17.8 19.1v-.26a4.5 4.5 0 0 0-4.5-4.5h-2.55a4.5 4.5 0 0 0-4.5 4.5v.26M21.25 12a9.25 9.25 0 1 1-18.5 0 9.25 9.25 0 0 1 18.5 0Zm-6.48-2.73a2.77 2.77 0 1 1-5.54 0 2.77 2.77 0 0 1 5.54 0Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                    </span>
+                    <div>
+                      <h3 class="text-base font-semibold text-gray-900 dark:text-white">Profil & preferensi</h3>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Nama tampilan, target, satuan, dan zona waktu</p>
+                    </div>
+                  </div>
+
+                  <form class="p-5" @submit.prevent="saveProfile()">
+                    <div class="flex items-center gap-3 rounded-xl bg-gray-50 p-3 dark:bg-white/5">
+                      <span class="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold text-white" x-text="$store.app.user?.name?.split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase()"></span>
+                      <div class="min-w-0 flex-1">
+                        <p class="truncate text-sm font-semibold text-gray-900 dark:text-white" x-text="$store.app.user?.name"></p>
+                        <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="$store.app.user?.email"></p>
+                      </div>
+                      <span class="rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold text-brand-600 shadow-theme-xs dark:bg-gray-900 dark:text-brand-400">Demo lokal</span>
+                    </div>
+
+                    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label for="profile-name" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Nama tampilan</label>
+                        <input id="profile-name" type="text" x-model="profile.name" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white" />
+                      </div>
+                      <div>
+                        <label for="profile-email" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                        <input id="profile-email" type="email" x-model="profile.email" disabled class="h-11 w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-500 dark:border-gray-800 dark:bg-white/5 dark:text-gray-400" />
+                      </div>
+                      <div>
+                        <label for="profile-goal" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Berat target (<span x-text="unit"></span>)</label>
+                        <input id="profile-goal" type="number" step="0.1" min="0" inputmode="decimal" x-model="profile.goalWeight" placeholder="Opsional" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white" />
+                      </div>
+                      <div>
+                        <label for="profile-days" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Target hari per minggu</label>
+                        <select id="profile-days" x-model.number="profile.targetDaysPerWeek" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                          <option :value="2">2 hari</option>
+                          <option :value="3">3 hari</option>
+                          <option :value="4">4 hari</option>
+                          <option :value="5">5 hari</option>
+                          <option :value="6">6 hari</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label for="profile-unit-weight" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Satuan berat</label>
+                        <select id="profile-unit-weight" x-model="profile.unitWeight" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                          <option value="kg">Kilogram (kg)</option>
+                          <option value="lb">Pound (lb)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label for="profile-unit-length" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Satuan panjang</label>
+                        <select id="profile-unit-length" x-model="profile.unitLength" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                          <option value="cm">Sentimeter (cm)</option>
+                          <option value="in">Inci (in)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label for="profile-timezone" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Zona waktu</label>
+                        <select id="profile-timezone" x-model="profile.timezone" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                          <template x-for="tz in timezones" :key="tz">
+                            <option :value="tz" x-text="tz.replace('_', ' ')"></option>
+                          </template>
+                        </select>
+                      </div>
+                      <div>
+                        <label for="profile-rest" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Rest timer default (detik)</label>
+                        <select id="profile-rest" x-model.number="profile.defaultRestSeconds" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                          <option :value="60">60 detik</option>
+                          <option :value="90">90 detik</option>
+                          <option :value="120">120 detik</option>
+                          <option :value="150">150 detik</option>
+                          <option :value="180">180 detik</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="mt-5 flex justify-end">
+                      <button type="submit" class="rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600">Simpan profil</button>
+                    </div>
+                  </form>
+                </section>
+
+                <!-- Rest timer -->
+                <section class="rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+                  <div class="flex items-center gap-3 border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+                    <span class="flex size-10 items-center justify-center rounded-xl bg-purple-50 text-purple-500 dark:bg-purple-500/15">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="1.7" /><path d="M12 9v4l2.5 2.5M9 2h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" /></svg>
+                    </span>
+                    <div>
+                      <h3 class="text-base font-semibold text-gray-900 dark:text-white">Rest timer</h3>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Timer otomatis setelah set dicentang</p>
+                    </div>
+                  </div>
+                  <div class="divide-y divide-gray-100 dark:divide-gray-800">
+                    <div class="flex items-center justify-between gap-4 px-5 py-4">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Mulai otomatis</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Jalankan timer saat set ditandai selesai.</p>
+                      </div>
+                      <button type="button" role="switch" :aria-checked="rest.auto" @click="rest.auto = !rest.auto" class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition" :class="rest.auto ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-700'">
+                        <span class="inline-block size-5 rounded-full bg-white shadow transition" :class="rest.auto ? 'translate-x-5' : 'translate-x-0.5'"></span>
+                      </button>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 px-5 py-4">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Bunyi saat selesai</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Bunyi singkat dan getaran bila didukung.</p>
+                      </div>
+                      <button type="button" role="switch" :aria-checked="rest.sound" @click="rest.sound = !rest.sound" class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition" :class="rest.sound ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-700'">
+                        <span class="inline-block size-5 rounded-full bg-white shadow transition" :class="rest.sound ? 'translate-x-5' : 'translate-x-0.5'"></span>
+                      </button>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 px-5 py-4">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Getaran</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Aktif di perangkat yang mendukung vibration API.</p>
+                      </div>
+                      <button type="button" role="switch" :aria-checked="rest.vibration" @click="rest.vibration = !rest.vibration" class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition" :class="rest.vibration ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-700'">
+                        <span class="inline-block size-5 rounded-full bg-white shadow transition" :class="rest.vibration ? 'translate-x-5' : 'translate-x-0.5'"></span>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="flex justify-end border-t border-gray-100 px-5 py-4 dark:border-gray-800">
+                    <button type="button" @click="saveRest()" class="rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600">Simpan timer</button>
+                  </div>
+                </section>
+
+                <!-- Notifications -->
+                <section class="rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+                  <div class="flex items-center gap-3 border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+                    <span class="flex size-10 items-center justify-center rounded-xl bg-orange-50 text-orange-500 dark:bg-orange-500/15">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10.3 21a2 2 0 0 0 3.4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                    </span>
+                    <div>
+                      <h3 class="text-base font-semibold text-gray-900 dark:text-white">Notifikasi & pengingat</h3>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Fallback in-app tetap aktif bila izin browser ditolak</p>
+                    </div>
+                  </div>
+
+                  <!-- Master switch -->
+                  <div class="mx-5 mt-5 flex items-center justify-between gap-4 rounded-xl border border-brand-100 bg-brand-50/60 p-4 dark:border-brand-500/20 dark:bg-brand-500/10">
+                    <div>
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">Semua notifikasi</p>
+                      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="allNotificationsOff ? 'Semua pengingat sedang nonaktif.' : 'Matikan semua pengingat dalam satu ketukan.'"></p>
+                    </div>
+                    <button type="button" role="switch" :aria-checked="!allNotificationsOff" @click="toggleAllNotifications()" class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition" :class="allNotificationsOff ? 'bg-gray-200 dark:bg-gray-700' : 'bg-brand-500'" aria-label="Aktifkan atau matikan semua notifikasi">
+                      <span class="inline-block size-5 rounded-full bg-white shadow transition" :class="allNotificationsOff ? 'translate-x-0.5' : 'translate-x-5'"></span>
+                    </button>
+                  </div>
+
+                  <!-- Push permission -->
+                  <div class="m-5 flex flex-col gap-3 rounded-xl border border-gray-100 p-4 sm:flex-row sm:items-center dark:border-gray-800">
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center gap-2">
+                        <p class="text-sm font-semibold text-gray-900 dark:text-white">Notifikasi browser</p>
+                        <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold" :class="pushStatus === 'granted' ? 'bg-green-50 text-green-600 dark:bg-green-500/15 dark:text-green-400' : pushStatus === 'denied' ? 'bg-red-50 text-red-600 dark:bg-red-500/15 dark:text-red-400' : 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400'" x-text="pushStatus === 'granted' ? 'Diizinkan' : pushStatus === 'denied' ? 'Diblokir' : pushStatus === 'unsupported' ? 'Tidak didukung' : 'Belum aktif'"></span>
+                      </div>
+                      <p class="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">Izinkan browser menampilkan pengingat. Di iOS, Web Push memerlukan aplikasi yang sudah dipasang ke Home Screen.</p>
+                    </div>
+                    <button type="button" @click="requestPush()" :disabled="pushStatus === 'granted' || pushStatus === 'unsupported'" class="shrink-0 rounded-lg bg-brand-500 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50" x-text="pushStatus === 'granted' ? 'Sudah aktif' : 'Aktifkan'"></button>
+                  </div>
+
+                  <div class="divide-y divide-gray-100 border-y border-gray-100 dark:divide-gray-800 dark:border-gray-800">
+                    <!-- Workout reminder -->
+                    <div class="px-5 py-4">
+                      <div class="flex items-center justify-between gap-4">
+                        <div>
+                          <p class="text-sm font-medium text-gray-900 dark:text-white">Pengingat sesi latihan</p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">Muncul pada hari yang dipilih.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <input type="time" x-model="notif.workoutReminder.time" @change="saveNotifications(true)" class="h-9 rounded-lg border border-gray-300 bg-transparent px-2 text-xs text-gray-700 dark:border-gray-700 dark:text-gray-300 dark:[color-scheme:dark]" aria-label="Jam pengingat latihan" />
+                          <button type="button" role="switch" :aria-checked="notif.workoutReminder.enabled" @click="notif.workoutReminder.enabled = !notif.workoutReminder.enabled; saveNotifications(true)" class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition" :class="notif.workoutReminder.enabled ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-700'">
+                            <span class="inline-block size-5 rounded-full bg-white shadow transition" :class="notif.workoutReminder.enabled ? 'translate-x-5' : 'translate-x-0.5'"></span>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="mt-2 flex flex-wrap gap-1.5">
+                        <template x-for="(day, index) in weekdays" :key="index">
+                          <button type="button" @click="toggleDay('workoutReminder', index)" class="flex size-8 items-center justify-center rounded-full text-[10px] font-semibold transition" :class="notif.workoutReminder.days?.includes(index) ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10'" x-text="day"></button>
+                        </template>
+                      </div>
+                    </div>
+
+                    <!-- Rest day -->
+                    <div class="flex items-center justify-between gap-4 px-5 py-4">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Pengingat rest day</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Ingatkan recovery dan hidrasi.</p>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <input type="time" x-model="notif.restDay.time" @change="saveNotifications(true)" class="h-9 rounded-lg border border-gray-300 bg-transparent px-2 text-xs text-gray-700 dark:border-gray-700 dark:text-gray-300 dark:[color-scheme:dark]" aria-label="Jam pengingat rest day" />
+                        <button type="button" role="switch" :aria-checked="notif.restDay.enabled" @click="notif.restDay.enabled = !notif.restDay.enabled; saveNotifications(true)" class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition" :class="notif.restDay.enabled ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-700'">
+                          <span class="inline-block size-5 rounded-full bg-white shadow transition" :class="notif.restDay.enabled ? 'translate-x-5' : 'translate-x-0.5'"></span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Missed session -->
+                    <div class="flex items-center justify-between gap-4 px-5 py-4">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Sesi terlewat</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Pengingat halus jika sesi kemarin terlewat.</p>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <input type="time" x-model="notif.missedSession.time" @change="saveNotifications(true)" class="h-9 rounded-lg border border-gray-300 bg-transparent px-2 text-xs text-gray-700 dark:border-gray-700 dark:text-gray-300 dark:[color-scheme:dark]" aria-label="Jam pengingat sesi terlewat" />
+                        <button type="button" role="switch" :aria-checked="notif.missedSession.enabled" @click="notif.missedSession.enabled = !notif.missedSession.enabled; saveNotifications(true)" class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition" :class="notif.missedSession.enabled ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-700'">
+                          <span class="inline-block size-5 rounded-full bg-white shadow transition" :class="notif.missedSession.enabled ? 'translate-x-5' : 'translate-x-0.5'"></span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Body reminder -->
+                    <div class="px-5 py-4">
+                      <div class="flex items-center justify-between gap-4">
+                        <div>
+                          <p class="text-sm font-medium text-gray-900 dark:text-white">Pengingat timbang & ukur</p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">Catat metrik tubuh secara berkala.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <input type="time" x-model="notif.bodyReminder.time" @change="saveNotifications(true)" class="h-9 rounded-lg border border-gray-300 bg-transparent px-2 text-xs text-gray-700 dark:border-gray-700 dark:text-gray-300 dark:[color-scheme:dark]" aria-label="Jam pengingat body tracker" />
+                          <button type="button" role="switch" :aria-checked="notif.bodyReminder.enabled" @click="notif.bodyReminder.enabled = !notif.bodyReminder.enabled; saveNotifications(true)" class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition" :class="notif.bodyReminder.enabled ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-700'">
+                            <span class="inline-block size-5 rounded-full bg-white shadow transition" :class="notif.bodyReminder.enabled ? 'translate-x-5' : 'translate-x-0.5'"></span>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="mt-2 flex flex-wrap gap-1.5">
+                        <template x-for="(day, index) in weekdays" :key="index">
+                          <button type="button" @click="toggleDay('bodyReminder', index)" class="flex size-8 items-center justify-center rounded-full text-[10px] font-semibold transition" :class="notif.bodyReminder.days?.includes(index) ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-white/10'" x-text="day"></button>
+                        </template>
+                      </div>
+                    </div>
+
+                    <!-- Rest timer notification -->
+                    <div class="flex items-center justify-between gap-4 px-5 py-4">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Notifikasi rest timer</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Beri tahu saat waktu istirahat habis.</p>
+                      </div>
+                      <button type="button" role="switch" :aria-checked="notif.restTimer.enabled" @click="notif.restTimer.enabled = !notif.restTimer.enabled; saveNotifications(true)" class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition" :class="notif.restTimer.enabled ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-700'">
+                        <span class="inline-block size-5 rounded-full bg-white shadow transition" :class="notif.restTimer.enabled ? 'translate-x-5' : 'translate-x-0.5'"></span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="flex justify-end px-5 py-4">
+                    <button type="button" @click="saveNotifications()" class="rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600">Simpan notifikasi</button>
+                  </div>
+                </section>
+              </div>
+
+              <!-- Sidebar -->
+              <div class="col-span-12 space-y-5 xl:col-span-4">
+                <!-- PWA -->
+                <section class="overflow-hidden rounded-2xl bg-gradient-to-br from-brand-600 via-brand-600 to-brand-800 p-5 text-white shadow-lg shadow-brand-500/20">
+                  <div class="flex items-center justify-between">
+                    <span class="flex size-10 items-center justify-center rounded-xl bg-white/15 text-xl backdrop-blur">📱</span>
+                    <span class="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold backdrop-blur" x-text="isStandalone ? 'Terpasang' : 'PWA'" ></span>
+                  </div>
+                  <h3 class="mt-4 text-lg font-semibold">Pasang Gym Tracker</h3>
+                  <p class="mt-1 text-xs leading-relaxed text-brand-100">Akses lebih cepat dari Home Screen, layar penuh, dan tetap bisa dibuka saat koneksi buruk.</p>
+                  <button x-show="!isStandalone" type="button" @click="installApp()" :disabled="installing" class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-brand-700 transition hover:bg-brand-50 disabled:opacity-60" x-text="installing ? 'Membuka prompt…' : 'Pasang aplikasi'"></button>
+                  <p x-show="isIOS && !isStandalone" class="mt-2 text-[10px] leading-relaxed text-brand-100">iPhone/iPad: tombol Share → “Tambah ke Home Screen”.</p>
+                  <p x-show="isStandalone" class="mt-3 text-xs font-medium text-white">Gym Tracker sudah berjalan sebagai aplikasi.</p>
+                </section>
+
+                <!-- Data -->
+                <section class="rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+                  <div class="border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">Data & jadwal</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Ekspor, isi jadwal, atau mulai ulang demo</p>
+                  </div>
+                  <div class="divide-y divide-gray-100 dark:divide-gray-800">
+                    <button type="button" @click="exportData()" class="flex w-full items-center gap-3 px-5 py-3.5 text-left transition hover:bg-gray-50 dark:hover:bg-white/5">
+                      <span class="flex size-9 items-center justify-center rounded-lg bg-green-50 text-green-600 dark:bg-green-500/15 dark:text-green-400">⬇️</span>
+                      <span class="min-w-0 flex-1">
+                        <span class="block text-sm font-medium text-gray-900 dark:text-white">Ekspor data JSON</span>
+                        <span class="block text-[11px] text-gray-500 dark:text-gray-400">Semua sesi, template, tubuh, dan jurnal.</span>
+                      </span>
+                    </button>
+                    <button type="button" @click="applyPlan()" class="flex w-full items-center gap-3 px-5 py-3.5 text-left transition hover:bg-gray-50 dark:hover:bg-white/5">
+                      <span class="flex size-9 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400">🗓️</span>
+                      <span class="min-w-0 flex-1">
+                        <span class="block text-sm font-medium text-gray-900 dark:text-white">Isi jadwal 4 minggu</span>
+                        <span class="block text-[11px] text-gray-500 dark:text-gray-400">Buat sesi dari pola mingguan saat ini.</span>
+                      </span>
+                    </button>
+                    <button type="button" @click="resetDemo()" class="flex w-full items-center gap-3 px-5 py-3.5 text-left transition hover:bg-gray-50 dark:hover:bg-white/5">
+                      <span class="flex size-9 items-center justify-center rounded-lg bg-orange-50 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400">🔄</span>
+                      <span class="min-w-0 flex-1">
+                        <span class="block text-sm font-medium text-gray-900 dark:text-white">Muat ulang data demo</span>
+                        <span class="block text-[11px] text-gray-500 dark:text-gray-400">Kembalikan akun demo ke kondisi awal.</span>
+                      </span>
+                    </button>
+                    <button type="button" @click="logout()" class="flex w-full items-center gap-3 px-5 py-3.5 text-left transition hover:bg-gray-50 dark:hover:bg-white/5">
+                      <span class="flex size-9 items-center justify-center rounded-lg bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400">🚪</span>
+                      <span class="min-w-0 flex-1">
+                        <span class="block text-sm font-medium text-gray-900 dark:text-white">Keluar akun</span>
+                        <span class="block text-[11px] text-gray-500 dark:text-gray-400">Sesi berakhir di perangkat ini.</span>
+                      </span>
+                    </button>
+                  </div>
+                </section>
+
+                <!-- Danger -->
+                <section class="rounded-2xl border border-red-200 bg-red-50/60 p-5 dark:border-red-500/20 dark:bg-red-500/5">
+                  <h3 class="text-sm font-semibold text-red-700 dark:text-red-300">Hapus akun</h3>
+                  <p class="mt-1 text-xs leading-relaxed text-red-600/80 dark:text-red-300/70">Menghapus akun demo dan seluruh data latihan dari browser ini. Tindakan ini tidak bisa dibatalkan.</p>
+                  <button type="button" @click="deleteOpen = true" class="mt-3 w-full rounded-lg border border-red-300 bg-white px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 dark:border-red-500/30 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-500/10">Hapus akun ini</button>
+                </section>
+
+                <p class="px-1 text-center text-[11px] leading-relaxed text-gray-400">
+                  Gym Tracker v1.0 · Mode demo lokal<br />
+                  Data disimpan di <code class="rounded bg-gray-100 px-1 py-0.5 text-[10px] dark:bg-white/5">localStorage</code>, bukan server.
+                </p>
+              </div>
+            </div>
+
+            <!-- Delete account modal -->
+            <div x-cloak x-show="deleteOpen" x-transition.opacity class="fixed inset-0 z-[80] flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-sm">
+              <div @click.outside="deleteOpen = false" class="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl dark:bg-gray-900">
+                <div class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-50 text-2xl dark:bg-red-500/15">⚠️</div>
+                <h3 class="mt-4 text-center text-lg font-semibold text-gray-900 dark:text-white">Hapus akun ini?</h3>
+                <p class="mt-1 text-center text-xs leading-relaxed text-gray-500 dark:text-gray-400">Seluruh sesi, template, metrik tubuh, jurnal, dan pengaturan akun <span class="font-medium text-gray-700 dark:text-gray-300" x-text="$store.app.user?.email"></span> akan dihapus permanen.</p>
+                <div class="mt-5 flex gap-2">
+                  <button type="button" @click="deleteOpen = false" class="flex-1 rounded-lg border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">Batal</button>
+                  <button type="button" @click="deleteAccount()" class="flex-1 rounded-lg bg-red-500 px-4 py-3 text-sm font-semibold text-white hover:bg-red-600">Hapus permanen</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <include src="./partials/layout/bottom-nav.html" />
+    <include src="./partials/layout/rest-timer.html" />
+    <include src="./partials/layout/toast.html" />
+    <include src="./partials/layout/pr-celebration.html" />
+  </body>
+</html>

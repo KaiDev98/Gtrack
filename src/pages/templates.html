@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#465fff" />
+    <meta name="description" content="Simpan rutinitas latihan sebagai template dan panggil saat di gym." />
+    <title>Template Program | Gym Tracker</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="images/favicon.ico" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  </head>
+  <body
+    style="visibility: hidden"
+    data-page="templates"
+    data-auth="required"
+    x-data="appShell('templates')"
+    :class="{ 'dark': darkMode }"
+    class="bg-gray-50 font-outfit text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100"
+  >
+    <div class="flex h-screen overflow-hidden">
+      <include src="./partials/layout/sidebar.html" />
+      <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+        <main id="main-content">
+          <include src="./partials/layout/header.html" />
+
+          <div class="mx-auto max-w-(--breakpoint-2xl) p-4 pb-28 md:p-6 xl:pb-8" x-data="templatesPage()">
+            <!-- Toolbar -->
+            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 class="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">Template program</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Simpan struktur gerakan dan set. Saat di gym, tinggal panggil dan catat beban aktual.</p>
+              </div>
+              <button type="button" @click="newTemplate()" class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 text-sm font-semibold text-white shadow-theme-xs transition hover:bg-brand-600">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+                Template baru
+              </button>
+            </div>
+
+            <!-- Summary -->
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+              <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+                <p class="text-2xl font-semibold text-gray-900 dark:text-white" x-text="templates.length"></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Template tersimpan</p>
+              </div>
+              <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+                <p class="text-2xl font-semibold text-gray-900 dark:text-white" x-text="templates.reduce((n, t) => n + t.exercises.length, 0)"></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Total gerakan</p>
+              </div>
+              <div class="col-span-2 rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs sm:col-span-1 dark:border-gray-800 dark:bg-white/[0.03]">
+                <p class="text-2xl font-semibold text-gray-900 dark:text-white" x-text="templates.reduce((n, t) => n + setCount(t), 0)"></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Total target set</p>
+              </div>
+            </div>
+
+            <!-- Template cards -->
+            <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <template x-for="template in templates" :key="template.id">
+                <div class="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+                  <div class="h-1 w-full" :style="`background:${split(template.splitType).hex}`"></div>
+                  <div class="flex flex-1 flex-col p-4 sm:p-5">
+                    <div class="flex items-start gap-3">
+                      <span class="flex size-11 shrink-0 items-center justify-center rounded-xl text-xs font-bold" :style="splitStyle(template.splitType)" x-text="split(template.splitType).short.slice(0, 2).toUpperCase()"></span>
+                      <div class="min-w-0 flex-1">
+                        <p class="truncate text-base font-semibold text-gray-900 dark:text-white" x-text="template.name"></p>
+                        <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                          <span x-text="split(template.splitType).label"></span> · <span x-text="template.exercises.length + ' gerakan'"></span> · <span x-text="setCount(template) + ' set'"></span>
+                        </p>
+                      </div>
+                      <div class="relative" x-data="{ menu: false }" @click.outside="menu = false">
+                        <button type="button" @click="menu = !menu" class="flex size-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5" aria-label="Menu template">
+                          <svg width="17" height="17" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><circle cx="10" cy="4" r="1.5" /><circle cx="10" cy="10" r="1.5" /><circle cx="10" cy="16" r="1.5" /></svg>
+                        </button>
+                        <div x-cloak x-show="menu" x-transition class="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-theme-lg dark:border-gray-700 dark:bg-gray-900">
+                          <button type="button" @click="menu = false; edit(template)" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5">Edit template</button>
+                          <button type="button" @click="menu = false; duplicate(template)" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5">Duplikat</button>
+                          <button type="button" @click="menu = false; scheduleTemplate(template)" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5">Jadwalkan</button>
+                          <button type="button" @click="menu = false; remove(template)" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10">Hapus</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mt-4 space-y-1.5">
+                      <template x-for="(entry, index) in template.exercises.slice(0, 4)" :key="entry.exerciseId + index">
+                        <div class="flex items-center gap-2 rounded-lg bg-gray-50 px-2.5 py-2 dark:bg-white/5">
+                          <span class="text-[10px] font-bold text-gray-400" x-text="String(index + 1).padStart(2, '0')"></span>
+                          <p class="min-w-0 flex-1 truncate text-xs font-medium text-gray-700 dark:text-gray-300" x-text="exerciseName(entry.exerciseId)"></p>
+                          <span class="shrink-0 text-[10px] text-gray-500 dark:text-gray-400" x-text="entry.targetSets + '×' + entry.targetRepsMin + '–' + entry.targetRepsMax"></span>
+                        </div>
+                      </template>
+                      <p x-show="template.exercises.length > 4" class="px-1 text-[10px] text-gray-400" x-text="'+' + (template.exercises.length - 4) + ' gerakan lainnya'"></p>
+                    </div>
+
+                    <div class="mt-auto flex gap-2 pt-4">
+                      <button type="button" @click="useToday(template)" class="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand-500 px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-brand-600">
+                        <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5 3.5 12 8l-7 4.5v-9Z" /></svg>
+                        Pakai hari ini
+                      </button>
+                      <button type="button" @click="scheduleTemplate(template)" class="rounded-lg border border-gray-200 px-3 py-2.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">Jadwalkan</button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <!-- Empty -->
+            <div x-show="templates.length === 0" x-cloak class="mt-5 rounded-2xl border border-dashed border-gray-200 px-6 py-16 text-center dark:border-gray-700">
+              <div class="mx-auto flex size-16 items-center justify-center rounded-3xl bg-brand-50 text-3xl dark:bg-brand-500/15">📋</div>
+              <p class="mt-4 text-base font-semibold text-gray-900 dark:text-white">Belum ada template</p>
+              <p class="mx-auto mt-1 max-w-sm text-sm text-gray-500 dark:text-gray-400">Buat template pertamamu agar tidak perlu mengetik ulang gerakan setiap sesi.</p>
+              <button type="button" @click="newTemplate()" class="mt-5 rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-600">Buat template pertama</button>
+            </div>
+
+            <!-- Tip -->
+            <div class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-500/20 dark:bg-amber-500/10">
+              <div class="flex gap-3">
+                <span class="text-xl">💡</span>
+                <div>
+                  <p class="text-sm font-semibold text-amber-900 dark:text-amber-200">Template vs sesi aktual</p>
+                  <p class="mt-1 text-xs leading-relaxed text-amber-700 dark:text-amber-300/80">Template hanya menyimpan struktur (gerakan, jumlah set, rentang reps, rest). Beban aktual yang kamu catat tetap tersimpan di riwayat sesi dan tidak mengubah template.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Editor modal -->
+            <div x-cloak x-show="editorOpen" x-transition.opacity class="fixed inset-0 z-[70] flex items-end justify-center bg-gray-900/50 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+              <div @click.outside="editorOpen = false" class="flex max-h-[94vh] w-full max-w-2xl flex-col rounded-t-3xl bg-white shadow-2xl sm:rounded-2xl dark:bg-gray-900">
+                <div class="flex items-center justify-between border-b border-gray-100 p-5 dark:border-gray-800">
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="editing?.id ? 'Edit template' : 'Template baru'"></h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Atur gerakan dan target set. Urutan bisa diubah.</p>
+                  </div>
+                  <button type="button" @click="editorOpen = false" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5" aria-label="Tutup">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="m3 3 12 12M15 3 3 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" /></svg>
+                  </button>
+                </div>
+
+                <div class="min-h-0 flex-1 overflow-y-auto p-5">
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label for="template-name" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Nama template</label>
+                      <input id="template-name" type="text" x-model="editing.name" placeholder="mis. Push Day A" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white" />
+                    </div>
+                    <div>
+                      <label for="template-split" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Split</label>
+                      <select id="template-split" x-model="editing.splitType" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                        <template x-for="option in splitOptions" :key="option.key">
+                          <option :value="option.key" x-text="option.label"></option>
+                        </template>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="mt-6 flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">Daftar gerakan</p>
+                      <p class="text-[11px] text-gray-500 dark:text-gray-400"><span x-text="editing?.exercises.length || 0"></span> gerakan · <span x-text="editing ? setCount(editing) : 0"></span> target set</p>
+                    </div>
+                    <button type="button" @click="openPicker()" class="inline-flex h-9 items-center gap-1.5 rounded-lg bg-brand-50 px-3 text-xs font-semibold text-brand-600 transition hover:bg-brand-100 dark:bg-brand-500/15 dark:text-brand-400">
+                      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" /></svg>
+                      Tambah gerakan
+                    </button>
+                  </div>
+
+                  <div class="mt-3 space-y-2">
+                    <template x-for="(entry, index) in (editing?.exercises || [])" :key="entry.exerciseId + index">
+                      <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-800">
+                        <div class="flex items-start gap-2">
+                          <span class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-[10px] font-bold text-gray-500 dark:bg-white/5 dark:text-gray-400" x-text="index + 1"></span>
+                          <div class="min-w-0 flex-1">
+                            <p class="truncate text-sm font-semibold text-gray-900 dark:text-white" x-text="exerciseName(entry.exerciseId)"></p>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400" x-text="exerciseMeta(entry.exerciseId)"></p>
+                          </div>
+                          <div class="flex items-center gap-1">
+                            <button type="button" @click="move(index, -1)" :disabled="index === 0" class="flex size-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 disabled:opacity-30 dark:hover:bg-white/5" aria-label="Naikkan">
+                              <svg width="13" height="13" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 12.5 5-5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                            </button>
+                            <button type="button" @click="move(index, 1)" :disabled="index === editing.exercises.length - 1" class="flex size-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 disabled:opacity-30 dark:hover:bg-white/5" aria-label="Turunkan">
+                              <svg width="13" height="13" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 7.5 5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                            </button>
+                            <button type="button" @click="removeExercise(index)" class="flex size-7 items-center justify-center rounded-md text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10" aria-label="Hapus">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2m-8 0 1 13h8l1-13M10 11v5m4-5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                          <label class="block">
+                            <span class="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-400">Set</span>
+                            <input type="number" min="1" max="12" x-model.number="entry.targetSets" class="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-center text-xs font-semibold text-gray-800 dark:border-gray-700 dark:text-white" />
+                          </label>
+                          <label class="block">
+                            <span class="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-400">Reps min</span>
+                            <input type="number" min="1" x-model.number="entry.targetRepsMin" class="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-center text-xs font-semibold text-gray-800 dark:border-gray-700 dark:text-white" />
+                          </label>
+                          <label class="block">
+                            <span class="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-400">Reps max</span>
+                            <input type="number" min="1" x-model.number="entry.targetRepsMax" class="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-center text-xs font-semibold text-gray-800 dark:border-gray-700 dark:text-white" />
+                          </label>
+                          <label class="block">
+                            <span class="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-400">Rest (dtk)</span>
+                            <input type="number" min="0" step="15" x-model.number="entry.restSeconds" class="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-center text-xs font-semibold text-gray-800 dark:border-gray-700 dark:text-white" />
+                          </label>
+                        </div>
+                      </div>
+                    </template>
+
+                    <template x-if="editing && editing.exercises.length === 0">
+                      <button type="button" @click="openPicker()" class="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 px-4 py-8 text-sm font-semibold text-gray-500 transition hover:border-brand-300 hover:bg-brand-50/40 hover:text-brand-600 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-brand-500/5">
+                        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+                        Tambah gerakan pertama
+                      </button>
+                    </template>
+                  </div>
+
+                  <p x-show="formError" x-cloak class="mt-4 rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-600 dark:bg-red-500/10 dark:text-red-400" x-text="formError"></p>
+                </div>
+
+                <div class="flex gap-2 border-t border-gray-100 p-5 dark:border-gray-800">
+                  <button type="button" @click="editorOpen = false" class="flex-1 rounded-lg border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">Batal</button>
+                  <button type="button" @click="save()" class="flex-1 rounded-lg bg-brand-500 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-600">Simpan template</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Exercise picker -->
+            <div x-cloak x-show="pickerOpen" x-transition.opacity class="fixed inset-0 z-[80] flex items-end justify-center bg-gray-900/60 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+              <div @click.outside="pickerOpen = false" class="flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-3xl bg-white shadow-2xl sm:rounded-2xl dark:bg-gray-900">
+                <div class="flex items-center justify-between border-b border-gray-100 p-4 dark:border-gray-800">
+                  <div>
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">Tambah gerakan</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Pilih dari library gerakan.</p>
+                  </div>
+                  <button type="button" @click="pickerOpen = false" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5" aria-label="Tutup">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="m3 3 12 12M15 3 3 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" /></svg>
+                  </button>
+                </div>
+                <div class="p-4">
+                  <input type="search" x-model="search" placeholder="Cari gerakan atau grup otot…" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white" />
+                </div>
+                <div class="min-h-0 flex-1 overflow-y-auto border-t border-gray-100 p-2 dark:border-gray-800">
+                  <template x-for="exercise in pickerResults" :key="exercise.id">
+                    <button type="button" @click="addExercise(exercise)" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-gray-50 dark:hover:bg-white/5">
+                      <span class="flex size-9 items-center justify-center rounded-lg bg-gray-100 text-xs font-bold text-gray-500 dark:bg-white/5 dark:text-gray-400" x-text="exercise.muscle.slice(0, 2).toUpperCase()"></span>
+                      <span class="min-w-0 flex-1">
+                        <span class="block truncate text-sm font-medium text-gray-900 dark:text-white" x-text="exercise.name"></span>
+                        <span class="block text-[11px] text-gray-500 dark:text-gray-400" x-text="exerciseMeta(exercise.id)"></span>
+                      </span>
+                      <svg class="size-4 text-brand-400" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+                    </button>
+                  </template>
+                  <template x-if="pickerResults.length === 0">
+                    <div class="px-4 py-10 text-center">
+                      <p class="text-3xl">🔍</p>
+                      <p class="mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">Tidak ada hasil</p>
+                      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Buat gerakan custom dari halaman Library Gerakan.</p>
+                      <a href="exercises.html" class="mt-3 inline-block text-xs font-semibold text-brand-500">Buka library →</a>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <include src="./partials/layout/bottom-nav.html" />
+    <include src="./partials/layout/rest-timer.html" />
+    <include src="./partials/layout/toast.html" />
+    <include src="./partials/layout/pr-celebration.html" />
+  </body>
+</html>

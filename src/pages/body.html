@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#465fff" />
+    <meta name="description" content="Pantau berat badan, lemak tubuh, dan lingkar tubuh." />
+    <title>Body Tracker | Gym Tracker</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="images/favicon.ico" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  </head>
+  <body
+    style="visibility: hidden"
+    data-page="body"
+    data-auth="required"
+    x-data="appShell('body')"
+    :class="{ 'dark': darkMode }"
+    class="bg-gray-50 font-outfit text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100"
+  >
+    <div class="flex h-screen overflow-hidden">
+      <include src="./partials/layout/sidebar.html" />
+      <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+        <main id="main-content">
+          <include src="./partials/layout/header.html" />
+
+          <div class="mx-auto max-w-(--breakpoint-2xl) p-4 pb-28 md:p-6 xl:pb-8" x-data="bodyPage()" x-init="init()" @gt-theme.window="$nextTick(() => renderCharts())">
+            <!-- Toolbar -->
+            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 class="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">Body tracker</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Hubungkan progres di gym dengan perubahan berat, lemak, dan lingkar tubuh.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="inline-flex rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
+                  <template x-for="r in [{key:'1m',label:'1B'},{key:'3m',label:'3B'},{key:'6m',label:'6B'},{key:'all',label:'Semua'}]" :key="r.key">
+                    <button type="button" @click="setRange(r.key)" class="rounded-md px-2.5 py-1.5 text-xs font-semibold transition" :class="range === r.key ? 'bg-white text-gray-900 shadow-theme-xs dark:bg-gray-700 dark:text-white' : 'text-gray-500 dark:text-gray-400'" x-text="r.label"></button>
+                  </template>
+                </div>
+                <button type="button" @click="openAdd()" class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 text-sm font-semibold text-white shadow-theme-xs transition hover:bg-brand-600">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+                  Catat tubuh
+                </button>
+              </div>
+            </div>
+
+            <!-- Metrics -->
+            <div class="grid grid-cols-2 gap-3 xl:grid-cols-4 xl:gap-4">
+              <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="flex items-center justify-between">
+                  <span class="flex size-9 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/15">⚖️</span>
+                  <span x-show="weightDelta !== null" class="rounded-full px-2 py-0.5 text-[10px] font-semibold" :class="(weightDelta || 0) <= 0 ? 'bg-green-50 text-green-600 dark:bg-green-500/15 dark:text-green-400' : 'bg-orange-50 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400'" x-text="`${(weightDelta || 0) > 0 ? '+' : ''}${weightDelta} ${unit}`"></span>
+                </div>
+                <p class="mt-3 text-2xl font-semibold text-gray-900 dark:text-white" x-text="latestWeightText"></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Berat terakhir</p>
+              </div>
+              <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="flex items-center justify-between">
+                  <span class="flex size-9 items-center justify-center rounded-xl bg-orange-50 text-orange-500 dark:bg-orange-500/15">🔥</span>
+                  <span x-show="fatDelta !== null" class="rounded-full px-2 py-0.5 text-[10px] font-semibold" :class="(fatDelta || 0) <= 0 ? 'bg-green-50 text-green-600 dark:bg-green-500/15 dark:text-green-400' : 'bg-orange-50 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400'" x-text="`${(fatDelta || 0) > 0 ? '+' : ''}${fatDelta}%`"></span>
+                </div>
+                <p class="mt-3 text-2xl font-semibold text-gray-900 dark:text-white" x-text="bodyFatText"></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Lemak tubuh</p>
+              </div>
+              <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="flex items-center justify-between">
+                  <span class="flex size-9 items-center justify-center rounded-xl bg-green-50 text-green-500 dark:bg-green-500/15">📏</span>
+                  <span x-show="waistDelta !== null" class="rounded-full px-2 py-0.5 text-[10px] font-semibold" :class="(waistDelta || 0) <= 0 ? 'bg-green-50 text-green-600 dark:bg-green-500/15 dark:text-green-400' : 'bg-orange-50 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400'" x-text="`${(waistDelta || 0) > 0 ? '+' : ''}${waistDelta} ${lengthUnit}`"></span>
+                </div>
+                <p class="mt-3 text-2xl font-semibold text-gray-900 dark:text-white" x-text="waistText"></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Lingkar pinggang</p>
+              </div>
+              <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="flex items-center justify-between">
+                  <span class="flex size-9 items-center justify-center rounded-xl bg-purple-50 text-purple-500 dark:bg-purple-500/15">🎯</span>
+                  <span class="rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-600 dark:bg-purple-500/15 dark:text-purple-400" x-text="goalWeight ? weight(goalWeight) : 'Belum diatur'"></span>
+                </div>
+                <p class="mt-3 text-2xl font-semibold text-gray-900 dark:text-white"><span x-text="goalProgress !== null ? goalProgress + '%' : '—'"></span></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Menuju berat target</p>
+                <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                  <div class="h-full rounded-full bg-gradient-to-r from-brand-500 to-green-500 transition-all" :style="`width:${goalProgress || 0}%`"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="mt-5 grid grid-cols-12 gap-5">
+              <div class="col-span-12 rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs sm:p-5 xl:col-span-8 dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">Berat badan & lemak tubuh</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Dua metrik, dua sumbu Y</p>
+                  </div>
+                  <div class="flex items-center gap-3 text-[10px] text-gray-500 dark:text-gray-400">
+                    <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-brand-500"></span>Berat</span>
+                    <span class="flex items-center gap-1"><span class="size-2 rounded-full bg-orange-400"></span>Lemak</span>
+                  </div>
+                </div>
+                <div class="mt-2" x-ref="weightChart"></div>
+              </div>
+
+              <div class="col-span-12 xl:col-span-4">
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+                  <div class="flex items-center gap-3">
+                    <span class="flex size-10 items-center justify-center rounded-xl bg-brand-50 text-lg dark:bg-brand-500/15">📊</span>
+                    <div>
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">Ringkasan awal vs sekarang</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Sejak pencatatan pertama</p>
+                    </div>
+                  </div>
+                  <div class="mt-4 space-y-2.5">
+                    <div class="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2.5 dark:bg-white/5">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Berat</span>
+                      <span class="text-xs font-semibold text-gray-900 dark:text-white">
+                        <span x-text="first?.weightKg ? weight(first.weightKg) : '—'"></span>
+                        <span class="text-gray-400"> → </span>
+                        <span x-text="latest?.weightKg ? weight(latest.weightKg) : '—'"></span>
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2.5 dark:bg-white/5">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Lemak tubuh</span>
+                      <span class="text-xs font-semibold text-gray-900 dark:text-white">
+                        <span x-text="first?.bodyFatPct ? first.bodyFatPct + '%' : '—'"></span>
+                        <span class="text-gray-400"> → </span>
+                        <span x-text="latest?.bodyFatPct ? latest.bodyFatPct + '%' : '—'"></span>
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2.5 dark:bg-white/5">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Pinggang</span>
+                      <span class="text-xs font-semibold text-gray-900 dark:text-white">
+                        <span x-text="first?.waistCm ? length(first.waistCm) : '—'"></span>
+                        <span class="text-gray-400"> → </span>
+                        <span x-text="latest?.waistCm ? length(latest.waistCm) : '—'"></span>
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2.5 dark:bg-white/5">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Total entri</span>
+                      <span class="text-xs font-semibold text-gray-900 dark:text-white" x-text="$store.app.bodyMetrics().length + ' catatan'"></span>
+                    </div>
+                  </div>
+                  <button type="button" @click="openAdd()" class="mt-4 w-full rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">Tambah pengukuran</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Measurements + compare -->
+            <div class="mt-5 grid grid-cols-12 gap-5">
+              <div class="col-span-12 rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs sm:p-5 xl:col-span-7 dark:border-gray-800 dark:bg-white/[0.03]">
+                <div>
+                  <h3 class="text-base font-semibold text-gray-900 dark:text-white">Lingkar tubuh</h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Lengan, dada, dan pinggang dalam <span x-text="lengthUnit"></span></p>
+                </div>
+                <div class="mt-2" x-ref="measureChart"></div>
+              </div>
+              <div class="col-span-12 rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs sm:p-5 xl:col-span-5 dark:border-gray-800 dark:bg-white/[0.03]">
+                <div>
+                  <h3 class="text-base font-semibold text-gray-900 dark:text-white">Volume latihan vs berat</h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Sesi dalam 3 hari sekitar tiap pengukuran</p>
+                </div>
+                <div class="mt-2" x-ref="compareChart"></div>
+              </div>
+            </div>
+
+            <!-- History -->
+            <div class="mt-5 rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+              <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+                <div>
+                  <h3 class="text-base font-semibold text-gray-900 dark:text-white">Riwayat pengukuran</h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Semua entri pada rentang yang dipilih</p>
+                </div>
+                <span class="rounded-full bg-gray-100 px-2.5 py-1 text-[10px] font-semibold text-gray-500 dark:bg-white/5 dark:text-gray-400" x-text="entries.length + ' entri'"></span>
+              </div>
+              <div class="divide-y divide-gray-100 dark:divide-gray-800">
+                <template x-for="entry in entries" :key="entry.id">
+                  <div class="flex items-start gap-3 px-4 py-3.5 sm:px-5">
+                    <div class="flex size-11 shrink-0 flex-col items-center justify-center rounded-xl bg-gray-50 text-center dark:bg-white/5">
+                      <span class="text-xs font-bold leading-none text-gray-900 dark:text-white" x-text="new Date(entry.date + 'T00:00:00').getDate()"></span>
+                      <span class="mt-0.5 text-[9px] uppercase leading-none text-gray-400" x-text="new Date(entry.date + 'T00:00:00').toLocaleDateString('id-ID', { month: 'short' })"></span>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="entry.weightKg ? weight(entry.weightKg) : 'Tanpa berat'"></p>
+                        <span x-show="entry.bodyFatPct" class="rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-semibold text-orange-600 dark:bg-orange-500/15 dark:text-orange-400" x-text="entry.bodyFatPct + '% lemak'"></span>
+                        <span x-show="entry.waistCm" class="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-600 dark:bg-green-500/15 dark:text-green-400" x-text="'Pinggang ' + length(entry.waistCm)"></span>
+                      </div>
+                      <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400" x-text="dateText(entry.date)"></p>
+                      <p x-show="entry.note" class="mt-1 text-[11px] italic text-gray-500 dark:text-gray-400" x-text="entry.note"></p>
+                    </div>
+                    <div class="flex shrink-0 items-center gap-1">
+                      <button type="button" @click="openEdit(entry)" class="flex size-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/5" aria-label="Edit entri">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m4 16.5-.8 4.3 4.3-.8L19 8.5 15.5 5 4 16.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" /><path d="m13.5 7 3.5 3.5" stroke="currentColor" stroke-width="1.6" /></svg>
+                      </button>
+                      <button type="button" @click="remove(entry)" class="flex size-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10" aria-label="Hapus entri">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2m-8 0 1 13h8l1-13M10 11v5m4-5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                </template>
+                <template x-if="entries.length === 0">
+                  <div class="px-5 py-14 text-center">
+                    <p class="text-4xl">⚖️</p>
+                    <p class="mt-3 text-sm font-semibold text-gray-900 dark:text-white">Belum ada pengukuran</p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Mulai catat berat dan lingkar tubuh untuk melihat trennya.</p>
+                    <button type="button" @click="openAdd()" class="mt-4 rounded-lg bg-brand-500 px-4 py-2.5 text-xs font-semibold text-white hover:bg-brand-600">Catat sekarang</button>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Add/edit modal -->
+            <div x-cloak x-show="modalOpen" x-transition.opacity class="fixed inset-0 z-[70] flex items-end justify-center bg-gray-900/50 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+              <div @click.outside="modalOpen = false" class="max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-2xl dark:bg-gray-900">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="editingId ? 'Edit pengukuran' : 'Catat pengukuran tubuh'"></h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Isi minimal satu metrik. Satuan mengikuti preferensi.</p>
+                  </div>
+                  <button type="button" @click="modalOpen = false" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5" aria-label="Tutup">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="m3 3 12 12M15 3 3 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" /></svg>
+                  </button>
+                </div>
+
+                <form class="mt-5 space-y-4" @submit.prevent="save()">
+                  <div>
+                    <label for="body-date" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal</label>
+                    <input id="body-date" type="date" x-model="form.date" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white dark:[color-scheme:dark]" />
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label for="body-weight" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Berat (<span x-text="unit"></span>)</label>
+                      <input id="body-weight" type="number" step="0.1" min="0" inputmode="decimal" x-model="form.weight" placeholder="mis. 72,5" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white" />
+                    </div>
+                    <div>
+                      <label for="body-fat" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Lemak tubuh (%)</label>
+                      <input id="body-fat" type="number" step="0.1" min="0" max="80" inputmode="decimal" x-model="form.bodyFat" placeholder="mis. 18,2" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Lingkar tubuh (<span x-text="lengthUnit"></span>)</p>
+                    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      <label class="block">
+                        <span class="mb-1 block text-[11px] text-gray-500 dark:text-gray-400">Lengan</span>
+                        <input type="number" step="0.1" min="0" inputmode="decimal" x-model="form.arm" class="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:text-white" />
+                      </label>
+                      <label class="block">
+                        <span class="mb-1 block text-[11px] text-gray-500 dark:text-gray-400">Dada</span>
+                        <input type="number" step="0.1" min="0" inputmode="decimal" x-model="form.chest" class="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:text-white" />
+                      </label>
+                      <label class="block">
+                        <span class="mb-1 block text-[11px] text-gray-500 dark:text-gray-400">Pinggang</span>
+                        <input type="number" step="0.1" min="0" inputmode="decimal" x-model="form.waist" class="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:text-white" />
+                      </label>
+                      <label class="block">
+                        <span class="mb-1 block text-[11px] text-gray-500 dark:text-gray-400">Paha</span>
+                        <input type="number" step="0.1" min="0" inputmode="decimal" x-model="form.thigh" class="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:text-white" />
+                      </label>
+                      <label class="block">
+                        <span class="mb-1 block text-[11px] text-gray-500 dark:text-gray-400">Bahu</span>
+                        <input type="number" step="0.1" min="0" inputmode="decimal" x-model="form.shoulder" class="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:text-white" />
+                      </label>
+                      <label class="block">
+                        <span class="mb-1 block text-[11px] text-gray-500 dark:text-gray-400">Pinggul</span>
+                        <input type="number" step="0.1" min="0" inputmode="decimal" x-model="form.hip" class="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:text-white" />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label for="body-note" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Catatan <span class="text-gray-400">(opsional)</span></label>
+                    <input id="body-note" type="text" x-model="form.note" placeholder="mis. timbang pagi, perut kosong" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white" />
+                  </div>
+
+                  <p x-show="formError" x-cloak class="rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-600 dark:bg-red-500/10 dark:text-red-400" x-text="formError"></p>
+
+                  <div class="flex gap-2 pt-1">
+                    <button type="button" @click="modalOpen = false" class="flex-1 rounded-lg border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">Batal</button>
+                    <button type="submit" class="flex-1 rounded-lg bg-brand-500 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-600" x-text="editingId ? 'Simpan perubahan' : 'Simpan'"></button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <include src="./partials/layout/bottom-nav.html" />
+    <include src="./partials/layout/rest-timer.html" />
+    <include src="./partials/layout/toast.html" />
+    <include src="./partials/layout/pr-celebration.html" />
+  </body>
+</html>

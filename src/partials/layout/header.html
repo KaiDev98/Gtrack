@@ -1,0 +1,156 @@
+<!-- App header -->
+<header class="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur dark:border-gray-800 dark:bg-gray-900/95">
+  <div class="flex h-16 items-center justify-between gap-3 px-4 md:h-18 md:px-6">
+    <!-- Left -->
+    <div class="flex min-w-0 items-center gap-3">
+      <a href="dashboard.html" class="flex items-center gap-2 xl:hidden" aria-label="Gym Tracker">
+        <span class="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 9.5v5M7 7.5v9M17 7.5v9M20 9.5v5M7 12h10" stroke="white" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </span>
+        <span class="text-sm font-semibold text-gray-900 dark:text-white">Gym Tracker</span>
+      </a>
+      <div class="hidden min-w-0 sm:block">
+        <h1 class="truncate text-lg font-semibold text-gray-900 dark:text-white" x-text="pageTitle"></h1>
+        <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="pageSubtitle"></p>
+      </div>
+    </div>
+
+    <!-- Right -->
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        @click="startQuick()"
+        class="hidden h-10 items-center gap-2 rounded-lg bg-brand-500 px-4 text-sm font-semibold text-white shadow-theme-xs transition hover:bg-brand-600 sm:flex"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5 3.5 12 8l-7 4.5v-9Z" fill="currentColor" /></svg>
+        Mulai Latihan
+      </button>
+
+      <!-- Theme -->
+      <button
+        type="button"
+        @click="darkMode = !darkMode"
+        class="inline-flex size-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+        :aria-label="darkMode ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'"
+      >
+        <svg x-show="darkMode" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6" />
+          <path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72 1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+        </svg>
+        <svg x-show="!darkMode" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M6.25 6.67a6.67 6.67 0 0 0 11.2 4.88A7.71 7.71 0 1 1 8.03 2.13a6.65 6.65 0 0 0-1.78 4.54Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+
+      <!-- Notifications -->
+      <div class="relative" x-data @click.outside="notificationsOpen = false">
+        <button
+          type="button"
+          @click="notificationsOpen = !notificationsOpen"
+          class="relative inline-flex size-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          aria-label="Notifikasi"
+          :aria-expanded="notificationsOpen"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10.3 21a2 2 0 0 0 3.4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span
+            x-show="unreadCount() > 0"
+            class="absolute -right-1 -top-1 flex min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white"
+            x-text="unreadCount()"
+          ></span>
+        </button>
+
+        <div
+          x-cloak
+          x-show="notificationsOpen"
+          x-transition
+          class="absolute right-0 z-50 mt-3 w-[calc(100vw-2rem)] max-w-96 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-lg dark:border-gray-800 dark:bg-gray-900"
+        >
+          <div class="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+            <div>
+              <p class="text-sm font-semibold text-gray-900 dark:text-white">Notifikasi</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400"><span x-text="unreadCount()"></span> belum dibaca</p>
+            </div>
+            <button type="button" @click="markAllRead()" class="text-xs font-medium text-brand-500 hover:text-brand-600">Tandai semua</button>
+          </div>
+          <div class="max-h-96 overflow-y-auto">
+            <template x-for="n in notifications()" :key="n.id">
+              <button type="button" @click="openNotification(n)" class="flex w-full gap-3 border-b border-gray-50 px-4 py-3 text-left transition hover:bg-gray-50 dark:border-gray-800/60 dark:hover:bg-white/5">
+                <span class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-sm dark:bg-brand-500/15">
+                  <template x-if="n.type === 'pr'"><span>🏆</span></template>
+                  <template x-if="n.type === 'reminder'"><span>💪</span></template>
+                  <template x-if="n.type === 'milestone'"><span>🎉</span></template>
+                  <template x-if="n.type === 'body'"><span>⚖️</span></template>
+                  <template x-if="n.type === 'info'"><span>👋</span></template>
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="flex items-start gap-2">
+                    <span class="flex-1 text-sm font-medium text-gray-900 dark:text-white" x-text="n.title"></span>
+                    <span class="mt-1 size-1.5 shrink-0 rounded-full bg-brand-500" x-show="!n.read"></span>
+                  </span>
+                  <span class="mt-0.5 block text-xs leading-relaxed text-gray-500 dark:text-gray-400" x-text="n.body"></span>
+                  <span class="mt-1 block text-[11px] text-gray-400" x-text="timeAgo(n.date)"></span>
+                </span>
+              </button>
+            </template>
+            <template x-if="notifications().length === 0">
+              <div class="px-4 py-10 text-center">
+                <p class="text-3xl">🔔</p>
+                <p class="mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">Belum ada notifikasi</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Pengingat dan PR baru akan muncul di sini.</p>
+              </div>
+            </template>
+          </div>
+          <a href="settings.html" class="block border-t border-gray-100 px-4 py-3 text-center text-xs font-medium text-brand-500 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/5">Atur notifikasi</a>
+        </div>
+      </div>
+
+      <!-- User -->
+      <div class="relative" x-data @click.outside="userMenuOpen = false">
+        <button
+          type="button"
+          @click="userMenuOpen = !userMenuOpen"
+          class="flex items-center gap-2 rounded-lg p-1 transition hover:bg-gray-50 dark:hover:bg-white/5"
+          aria-label="Menu pengguna"
+          :aria-expanded="userMenuOpen"
+        >
+          <span class="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 text-xs font-bold text-white" x-text="initials"></span>
+          <span class="hidden text-left lg:block">
+            <span class="block max-w-32 truncate text-sm font-medium text-gray-900 dark:text-white" x-text="currentUser?.name"></span>
+            <span class="block text-[11px] text-gray-500 dark:text-gray-400">Lihat profil</span>
+          </span>
+          <svg class="hidden size-4 text-gray-400 lg:block" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4.79 7.4 5.21 5.2 5.21-5.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </button>
+
+        <div
+          x-cloak
+          x-show="userMenuOpen"
+          x-transition
+          class="absolute right-0 z-50 mt-3 w-64 overflow-hidden rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900"
+        >
+          <div class="px-3 py-2">
+            <p class="truncate text-sm font-semibold text-gray-900 dark:text-white" x-text="currentUser?.name"></p>
+            <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="currentUser?.email"></p>
+          </div>
+          <div class="my-1 h-px bg-gray-100 dark:bg-gray-800"></div>
+          <a href="settings.html" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5">
+            <svg class="size-5 text-gray-500" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17.8 19.1v-.26a4.5 4.5 0 0 0-4.5-4.5h-2.55a4.5 4.5 0 0 0-4.5 4.5v.26M21.25 12a9.25 9.25 0 1 1-18.5 0 9.25 9.25 0 0 1 18.5 0Zm-6.48-2.73a2.77 2.77 0 1 1-5.54 0 2.77 2.77 0 0 1 5.54 0Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            Profil & Pengaturan
+          </a>
+          <a href="body.html" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5">
+            <svg class="size-5 text-gray-500" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="5" r="2.25" stroke="currentColor" stroke-width="1.6" /><path d="M12 7.5v6m0 0-3 7m3-7 3 7M6.5 10 12 11.5 17.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            Body Tracker
+          </a>
+          <div class="my-1 h-px bg-gray-100 dark:bg-gray-800"></div>
+          <button type="button" @click="logout()" class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m7 14 5-5-5-5m5 5H9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            Keluar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

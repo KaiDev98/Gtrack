@@ -1,0 +1,121 @@
+<!-- Sidebar (desktop) -->
+<aside
+  class="hidden h-screen w-72.5 shrink-0 flex-col border-r border-gray-200 bg-white px-5 xl:flex dark:border-gray-800 dark:bg-black"
+  aria-label="Navigasi utama"
+>
+  <!-- Brand -->
+  <div class="flex h-20 items-center gap-3 border-b border-gray-100 dark:border-gray-800">
+    <a href="dashboard.html" class="flex items-center gap-3" aria-label="Gym Tracker">
+      <span class="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-lg shadow-brand-500/25">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 9.5v5M7 7.5v9M17 7.5v9M20 9.5v5M7 12h10" stroke="white" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </span>
+      <span class="leading-tight">
+        <span class="block text-lg font-semibold tracking-tight text-gray-900 dark:text-white">Gym Tracker</span>
+        <span class="block text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-500">Track your gains</span>
+      </span>
+    </a>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="no-scrollbar flex-1 overflow-y-auto py-6">
+    <p class="mb-3 px-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Utama</p>
+    <ul class="mb-7 flex flex-col gap-1">
+      <li>
+        <a href="dashboard.html" class="menu-item" :class="page === 'dashboard' ? 'menu-item-active' : 'menu-item-inactive'">
+          <svg class="size-6 shrink-0" :class="page === 'dashboard' ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M5.5 3.25C4.26 3.25 3.25 4.26 3.25 5.5V9c0 1.24 1.01 2.25 2.25 2.25H9c1.24 0 2.25-1.01 2.25-2.25V5.5c0-1.24-1.01-2.25-2.25-2.25H5.5Zm11.5 0c-1.24 0-2.25 1.01-2.25 2.25V9c0 1.24 1.01 2.25 2.25 2.25h3.5c1.24 0 2.25-1.01 2.25-2.25V5.5c0-1.24-1.01-2.25-2.25-2.25H17ZM3.25 15c0-1.24 1.01-2.25 2.25-2.25H9c1.24 0 2.25 1.01 2.25 2.25v3.5c0 1.24-1.01 2.25-2.25 2.25H5.5c-1.24 0-2.25-1.01-2.25-2.25V15Zm11.5-2.25c-1.24 0-2.25 1.01-2.25 2.25v3.5c0 1.24 1.01 2.25 2.25 2.25h3.5c1.24 0 2.25-1.01 2.25-2.25V15c0-1.24-1.01-2.25-2.25-2.25H17Z" fill="currentColor" />
+          </svg>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li>
+        <a href="schedule.html" class="menu-item" :class="page === 'schedule' ? 'menu-item-active' : 'menu-item-inactive'">
+          <svg class="size-6 shrink-0" :class="page === 'schedule' ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M8 2c.41 0 .75.34.75.75v1h6.5v-1a.75.75 0 0 1 1.5 0v1h1.75c1.24 0 2.25 1.01 2.25 2.25V19c0 1.24-1.01 2.25-2.25 2.25H5.5c-1.24 0-2.25-1.01-2.25-2.25V6c0-1.24 1.01-2.25 2.25-2.25h1.75v-1c0-.41.34-.75.75-.75ZM4.75 9.75V19c0 .41.34.75.75.75h13c.41 0 .75-.34.75-.75V9.75H4.75Z" fill="currentColor" />
+          </svg>
+          <span>Jadwal</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" @click.prevent="startQuick()" class="menu-item" :class="page === 'workout' ? 'menu-item-active' : 'menu-item-inactive'">
+          <svg class="size-6 shrink-0" :class="page === 'workout' ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 9.5v5M7 7.5v9M17 7.5v9M20 9.5v5M7 12h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+          <span>Latihan</span>
+          <span class="ms-auto rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-semibold text-brand-600 dark:bg-brand-500/15 dark:text-brand-400">Mulai</span>
+        </a>
+      </li>
+      <li>
+        <a href="templates.html" class="menu-item" :class="page === 'templates' ? 'menu-item-active' : 'menu-item-inactive'">
+          <svg class="size-6 shrink-0" :class="page === 'templates' ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M4.25 5.5c0-1.24 1.01-2.25 2.25-2.25h11c1.24 0 2.25 1.01 2.25 2.25v16c0 .83-.87 1.36-1.6.97L12 19.12l-6.15 3.35c-.73.39-1.6-.14-1.6-.97v-16Z" fill="currentColor" />
+          </svg>
+          <span>Template</span>
+        </a>
+      </li>
+      <li>
+        <a href="exercises.html" class="menu-item" :class="page === 'exercises' ? 'menu-item-active' : 'menu-item-inactive'">
+          <svg class="size-6 shrink-0" :class="page === 'exercises' ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 6v12M18 6v12M3.5 9.5v5M20.5 9.5v5M6 12h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+          <span>Gerakan</span>
+        </a>
+      </li>
+      <li>
+        <a href="progress.html" class="menu-item" :class="page === 'progress' ? 'menu-item-active' : 'menu-item-inactive'">
+          <svg class="size-6 shrink-0" :class="page === 'progress' ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M3.75 20.25h16.5M7 16.5v-4M12 16.5V8M17 16.5V5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+          <span>Progres</span>
+        </a>
+      </li>
+    </ul>
+
+    <p class="mb-3 px-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Tubuh & Refleksi</p>
+    <ul class="mb-7 flex flex-col gap-1">
+      <li>
+        <a href="body.html" class="menu-item" :class="page === 'body' ? 'menu-item-active' : 'menu-item-inactive'">
+          <svg class="size-6 shrink-0" :class="page === 'body' ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="5" r="2.25" stroke="currentColor" stroke-width="1.7" />
+            <path d="M12 7.5v6m0 0-3 7m3-7 3 7M6.5 10 12 11.5 17.5 10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span>Body Tracker</span>
+        </a>
+      </li>
+      <li>
+        <a href="journal.html" class="menu-item" :class="page === 'journal' ? 'menu-item-active' : 'menu-item-inactive'">
+          <svg class="size-6 shrink-0" :class="page === 'journal' ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 4.75h11.5a2.75 2.75 0 0 1 0 5.5H5v-5.5Zm0 5.5h11.5a2.75 2.75 0 0 1 0 5.5H5v-5.5Zm0 5.5h7.5v3.5H7.25A2.25 2.25 0 0 1 5 17v-1.25Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+          </svg>
+          <span>Jurnal</span>
+        </a>
+      </li>
+      <li>
+        <a href="settings.html" class="menu-item" :class="page === 'settings' ? 'menu-item-active' : 'menu-item-inactive'">
+          <svg class="size-6 shrink-0" :class="page === 'settings' ? 'menu-item-icon-active' : 'menu-item-icon-inactive'" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6" />
+            <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.55V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 8.96 4.6h.08A1.7 1.7 0 0 0 10.07 3.05V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.08a1.7 1.7 0 0 0 1.55 1.03H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span>Pengaturan</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Daily prompt -->
+    <div class="rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 p-4 text-white shadow-lg shadow-brand-500/20">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-brand-100">Sesi hari ini</p>
+      <p class="mt-1 text-sm font-medium leading-snug">Satu set lagi hari ini lebih baik dari nol.</p>
+      <button type="button" @click="startQuick()" class="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-white/15 px-3 py-2 text-sm font-semibold backdrop-blur transition hover:bg-white/25">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5 3.5 12 8l-7 4.5v-9Z" fill="currentColor" /></svg>
+        Mulai latihan
+      </button>
+    </div>
+  </nav>
+
+  <!-- Footer -->
+  <div class="border-t border-gray-100 py-4 dark:border-gray-800">
+    <p class="px-3 text-[11px] text-gray-400">Gym Tracker v1.0 · Data tersimpan lokal</p>
+  </div>
+</aside>

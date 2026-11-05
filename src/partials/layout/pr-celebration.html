@@ -1,0 +1,42 @@
+<!-- PR celebration -->
+<div
+  x-data
+  x-cloak
+  x-show="$store.pr.visible"
+  x-transition.opacity
+  class="fixed inset-0 z-[9998] flex items-center justify-center overflow-hidden bg-gray-900/60 p-4 backdrop-blur-sm"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Personal record baru"
+>
+  <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+    <template x-for="piece in $store.pr.confetti" :key="piece.id">
+      <span
+        class="pr-confetti absolute top-0 block h-3 w-1.5 rounded-sm opacity-90"
+        :style="`left:${piece.left}%;background:${piece.color};animation-delay:${piece.delay}s;animation-duration:${piece.duration}s;transform:rotate(${piece.rotate}deg)`"
+      ></span>
+    </template>
+  </div>
+
+  <div class="relative w-full max-w-sm overflow-hidden rounded-3xl bg-white p-6 text-center shadow-2xl dark:bg-gray-900" x-transition>
+    <div class="mx-auto flex size-20 items-center justify-center rounded-full bg-gradient-to-br from-amber-100 to-orange-100 text-4xl dark:from-amber-500/20 dark:to-orange-500/20">🏆</div>
+    <p class="mt-4 text-xs font-bold uppercase tracking-[0.2em] text-orange-500">Personal Record Baru</p>
+    <h2 class="mt-1 text-xl font-semibold text-gray-900 dark:text-white" x-text="$store.pr.hits[0]?.exerciseName || 'Luar biasa!'"></h2>
+    <div class="mt-4 space-y-2 text-left">
+      <template x-for="(hit, index) in $store.pr.hits" :key="index">
+        <div class="flex items-center justify-between gap-3 rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/5">
+          <div>
+            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="hit.label"></p>
+            <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="$store.pr.formatHit(hit, 'value')"></p>
+          </div>
+          <div class="text-right">
+            <p class="text-[10px] uppercase tracking-wide text-gray-400">Sebelumnya</p>
+            <p class="text-xs font-medium text-gray-500 line-through dark:text-gray-400" x-text="$store.pr.formatHit(hit, 'previous')"></p>
+          </div>
+        </div>
+      </template>
+    </div>
+    <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">Progressive overload-nya kelihatan. Terus konsisten! 💪</p>
+    <button type="button" @click="$store.pr.hide()" class="mt-5 w-full rounded-xl bg-brand-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-600">Lanjut latihan</button>
+  </div>
+</div>

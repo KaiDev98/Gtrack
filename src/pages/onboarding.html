@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#465fff" />
+    <meta name="description" content="Atur preferensi awal Gym Tracker." />
+    <title>Onboarding | Gym Tracker</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="images/favicon.ico" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  </head>
+  <body
+    style="visibility: hidden"
+    data-page="onboarding"
+    data-auth="required"
+    x-data="appShell('onboarding')"
+    :class="{ 'dark': darkMode }"
+    class="min-h-screen bg-gray-50 font-outfit text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100"
+  >
+    <div class="relative flex min-h-screen flex-col overflow-hidden">
+      <!-- Decorative background -->
+      <div class="pointer-events-none absolute -right-32 -top-32 size-96 rounded-full bg-brand-500/10 blur-3xl"></div>
+      <div class="pointer-events-none absolute -bottom-40 -left-32 size-96 rounded-full bg-orange-500/10 blur-3xl"></div>
+
+      <header class="relative flex items-center justify-between px-5 py-5 sm:px-8">
+        <a href="dashboard.html" class="flex items-center gap-2.5" aria-label="Gym Tracker">
+          <span class="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-lg shadow-brand-500/25">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 9.5v5M7 7.5v9M17 7.5v9M20 9.5v5M7 12h10" stroke="white" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </span>
+          <span class="leading-tight">
+            <span class="block text-base font-semibold tracking-tight text-gray-900 dark:text-white">Gym Tracker</span>
+            <span class="block text-[9px] font-semibold uppercase tracking-[0.18em] text-brand-500">Track your gains</span>
+          </span>
+        </a>
+        <div class="flex items-center gap-3">
+          <button type="button" @click="darkMode = !darkMode" class="inline-flex size-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800" :aria-label="darkMode ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'">
+            <svg x-show="darkMode" width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6" /><path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72 1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+            <svg x-show="!darkMode" width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M6.25 6.67a6.67 6.67 0 0 0 11.2 4.88A7.71 7.71 0 1 1 8.03 2.13a6.65 6.65 0 0 0-1.78 4.54Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+          <a href="dashboard.html" class="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Lewati</a>
+        </div>
+      </header>
+
+      <main class="relative flex flex-1 items-center justify-center px-5 py-6 sm:px-8">
+        <div class="w-full max-w-xl" x-data="onboardingPage()" x-init="init()">
+          <!-- Progress -->
+          <div class="mb-6">
+            <div class="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+              <span>Langkah <span x-text="step"></span> dari 3</span>
+              <span x-text="['Preferensi', 'Target latihan', 'Siap mulai'][step - 1]"></span>
+            </div>
+            <div class="mt-2 flex gap-1.5">
+              <template x-for="i in [1, 2, 3]" :key="i">
+                <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
+                  <div class="h-full rounded-full bg-brand-500 transition-all duration-300" :style="`width:${step >= i ? '100%' : '0%'}`"></div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <div class="rounded-3xl border border-gray-200 bg-white p-5 shadow-theme-xs sm:p-7 dark:border-gray-800 dark:bg-gray-900">
+            <!-- Step 1 -->
+            <div x-show="step === 1" x-transition.opacity>
+              <span class="flex size-12 items-center justify-center rounded-2xl bg-brand-50 text-2xl dark:bg-brand-500/15">⚙️</span>
+              <h1 class="mt-4 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">Kenalan dulu, yuk</h1>
+              <p class="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">Pilih satuan dan zona waktu agar catatan latihanmu terasa natural.</p>
+
+              <div class="mt-6 space-y-5">
+                <div>
+                  <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Satuan berat</p>
+                  <div class="grid grid-cols-2 gap-2">
+                    <template x-for="option in [{value:'kg',label:'Kilogram',hint:'kg'},{value:'lb',label:'Pound',hint:'lb'}]" :key="option.value">
+                      <button
+                        type="button"
+                        @click="unitWeight = option.value"
+                        class="flex items-center justify-between rounded-xl border px-4 py-3 text-left transition"
+                        :class="unitWeight === option.value ? 'border-brand-500 bg-brand-50 dark:border-brand-500 dark:bg-brand-500/10' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-white/5'"
+                      >
+                        <span>
+                          <span class="block text-sm font-semibold text-gray-900 dark:text-white" x-text="option.label"></span>
+                          <span class="block text-[11px] text-gray-500 dark:text-gray-400" x-text="'Beban dalam ' + option.hint"></span>
+                        </span>
+                        <span class="flex size-5 items-center justify-center rounded-full border" :class="unitWeight === option.value ? 'border-brand-500 bg-brand-500 text-white' : 'border-gray-300 dark:border-gray-600'">
+                          <svg x-show="unitWeight === option.value" width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3 8.5 3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        </span>
+                      </button>
+                    </template>
+                  </div>
+                </div>
+
+                <div>
+                  <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Satuan panjang tubuh</p>
+                  <div class="grid grid-cols-2 gap-2">
+                    <template x-for="option in [{value:'cm',label:'Sentimeter',hint:'cm'},{value:'in',label:'Inci',hint:'in'}]" :key="option.value">
+                      <button
+                        type="button"
+                        @click="unitLength = option.value"
+                        class="flex items-center justify-between rounded-xl border px-4 py-3 text-left transition"
+                        :class="unitLength === option.value ? 'border-brand-500 bg-brand-50 dark:border-brand-500 dark:bg-brand-500/10' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-white/5'"
+                      >
+                        <span>
+                          <span class="block text-sm font-semibold text-gray-900 dark:text-white" x-text="option.label"></span>
+                          <span class="block text-[11px] text-gray-500 dark:text-gray-400" x-text="'Lingkar dalam ' + option.hint"></span>
+                        </span>
+                        <span class="flex size-5 items-center justify-center rounded-full border" :class="unitLength === option.value ? 'border-brand-500 bg-brand-500 text-white' : 'border-gray-300 dark:border-gray-600'">
+                          <svg x-show="unitLength === option.value" width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3 8.5 3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        </span>
+                      </button>
+                    </template>
+                  </div>
+                </div>
+
+                <div>
+                  <label for="timezone" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Zona waktu</label>
+                  <select id="timezone" x-model="timezone" class="h-12 w-full rounded-xl border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                    <template x-for="tz in timezones" :key="tz">
+                      <option :value="tz" x-text="tz.replace('_', ' ')"></option>
+                    </template>
+                  </select>
+                  <p class="mt-1 text-[11px] text-gray-400">Dipakai untuk pengingat dan penanda tanggal sesi.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div x-show="step === 2" x-transition.opacity>
+              <span class="flex size-12 items-center justify-center rounded-2xl bg-orange-50 text-2xl dark:bg-orange-500/15">🎯</span>
+              <h1 class="mt-4 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">Target dan ritme latihan</h1>
+              <p class="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">Kami akan memakai angka ini untuk menghitung konsistensi mingguanmu.</p>
+
+              <div class="mt-6 space-y-6">
+                <div>
+                  <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Hari latihan per minggu</p>
+                    <span class="rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-600 dark:bg-brand-500/15 dark:text-brand-400" x-text="targetDays + ' hari'"></span>
+                  </div>
+                  <div class="mt-3 grid grid-cols-5 gap-2">
+                    <template x-for="n in [2, 3, 4, 5, 6]" :key="n">
+                      <button type="button" @click="targetDays = n" class="rounded-xl border py-3 text-sm font-semibold transition" :class="targetDays === n ? 'border-brand-500 bg-brand-500 text-white' : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5'" x-text="n"></button>
+                    </template>
+                  </div>
+                  <p class="mt-2 text-[11px] text-gray-400">Pemula disarankan 3–4 hari. Bisa diubah kapan saja di Pengaturan.</p>
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Istirahat default antar set</p>
+                    <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600 dark:bg-white/5 dark:text-gray-300" x-text="defaultRest + ' detik'"></span>
+                  </div>
+                  <div class="mt-3 grid grid-cols-4 gap-2">
+                    <template x-for="seconds in [60, 90, 120, 150]" :key="seconds">
+                      <button type="button" @click="defaultRest = seconds" class="rounded-xl border py-3 text-xs font-semibold transition" :class="defaultRest === seconds ? 'border-brand-500 bg-brand-500 text-white' : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5'" x-text="seconds + ' dtk'"></button>
+                    </template>
+                  </div>
+                  <p class="mt-2 text-[11px] text-gray-400">Rest timer akan otomatis berjalan setelah set dicentang.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div x-show="step === 3" x-transition.opacity>
+              <span class="flex size-12 items-center justify-center rounded-2xl bg-green-50 text-2xl dark:bg-green-500/15">🚀</span>
+              <h1 class="mt-4 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">Semua siap!</h1>
+              <p class="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">Pilih bantuan awal yang kamu butuhkan, lalu mulai sesi pertamamu.</p>
+
+              <div class="mt-6 space-y-3">
+                <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-200 p-4 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-white/5">
+                  <input type="checkbox" x-model="starterPack" class="mt-0.5 size-5 rounded border-gray-300 text-brand-500 focus:ring-brand-500" />
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-sm font-semibold text-gray-900 dark:text-white">Buat starter pack PPL</span>
+                    <span class="mt-0.5 block text-xs leading-relaxed text-gray-500 dark:text-gray-400">Tiga template (Push, Pull, Legs) dan pola mingguan 3 hari latihan + 4 hari rest, langsung siap dipakai.</span>
+                  </span>
+                  <span class="text-xl">📦</span>
+                </label>
+
+                <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-200 p-4 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-white/5">
+                  <input type="checkbox" x-model="notifications" class="mt-0.5 size-5 rounded border-gray-300 text-brand-500 focus:ring-brand-500" />
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-sm font-semibold text-gray-900 dark:text-white">Aktifkan pengingat latihan</span>
+                    <span class="mt-0.5 block text-xs leading-relaxed text-gray-500 dark:text-gray-400">Pengingat in-app saat ada sesi terjadwal. Izin notifikasi browser bisa diatur nanti.</span>
+                  </span>
+                  <span class="text-xl">🔔</span>
+                </label>
+
+                <div class="rounded-2xl bg-gray-50 p-4 dark:bg-white/5">
+                  <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Ringkasan</p>
+                  <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
+                    <p class="text-gray-500 dark:text-gray-400">Satuan</p>
+                    <p class="text-right font-medium text-gray-900 dark:text-white" x-text="unitWeight + ' · ' + unitLength"></p>
+                    <p class="text-gray-500 dark:text-gray-400">Target</p>
+                    <p class="text-right font-medium text-gray-900 dark:text-white" x-text="targetDays + ' hari / minggu'"></p>
+                    <p class="text-gray-500 dark:text-gray-400">Rest timer</p>
+                    <p class="text-right font-medium text-gray-900 dark:text-white" x-text="defaultRest + ' detik'"></p>
+                    <p class="text-gray-500 dark:text-gray-400">Zona waktu</p>
+                    <p class="truncate text-right font-medium text-gray-900 dark:text-white" x-text="timezone.replace('_', ' ')"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="mt-7 flex items-center gap-2">
+              <button x-show="step > 1" type="button" @click="back()" class="h-12 rounded-xl border border-gray-200 px-4 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">Kembali</button>
+              <button x-show="step < 3" type="button" @click="next()" class="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-500 text-sm font-semibold text-white transition hover:bg-brand-600">
+                Lanjut
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m7.5 5 5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </button>
+              <button x-show="step === 3" type="button" @click="finish()" :disabled="loading" class="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-green-500 text-sm font-semibold text-white transition hover:bg-green-600 disabled:opacity-60">
+                <svg x-show="loading" class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity=".3" stroke-width="3" /><path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round" /></svg>
+                Mulai Gym Tracker
+              </button>
+            </div>
+          </div>
+
+          <p class="mt-4 text-center text-[11px] text-gray-400">Data demo tersimpan lokal di browser ini. Kamu bisa mengekspornya dari Pengaturan.</p>
+        </div>
+      </main>
+    </div>
+
+    <include src="./partials/layout/toast.html" />
+  </body>
+</html>

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#465fff" />
+    <meta name="description" content="Gym Tracker — catat latihan beban, pantau progres, dan raih personal record." />
+    <title>Gym Tracker — Track your gains</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="images/favicon.ico" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <noscript><meta http-equiv="refresh" content="0;url=signin.html" /></noscript>
+  </head>
+  <body
+    style="visibility: hidden"
+    data-page="landing"
+    data-auth="public"
+    x-data="appShell('landing')"
+    :class="{ 'dark': darkMode }"
+    class="flex min-h-screen items-center justify-center bg-gray-50 font-outfit text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100"
+  >
+    <div class="flex flex-col items-center gap-5 px-6 text-center">
+      <span class="flex size-16 items-center justify-center rounded-3xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-lg shadow-brand-500/30">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 9.5v5M7 7.5v9M17 7.5v9M20 9.5v5M7 12h10" stroke="white" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </span>
+      <div>
+        <p class="text-lg font-semibold tracking-tight text-gray-900 dark:text-white">Gym Tracker</p>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Menyiapkan dashboard latihanmu…</p>
+      </div>
+      <span class="size-6 animate-spin rounded-full border-2 border-brand-200 border-t-brand-500" aria-hidden="true"></span>
+    </div>
+
+    <script>
+      // Fallback for browsers where the app bundle fails to load.
+      setTimeout(function () {
+        if (document.body.style.visibility === "hidden") {
+          window.location.replace("signin.html");
+        }
+      }, 4000);
+    </script>
+  </body>
+</html>
